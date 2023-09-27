@@ -3,6 +3,17 @@ import math
 import numpy as np
 
 
+class Node():
+    def __init__(self, index=None, threshold=None, leftChild=None, rightChild=None, info_gain=None, value=None):
+        self.index = index
+        self.threshold = threshold
+        self.leftChild = leftChild
+        self.rightChild = rightChild
+        self.info_gain = info_gain
+
+        self.value = value
+
+
 def calculate_entropy(df):
     # once we have the possible splits we will try to find entropy for the same
     # h_y = -p0*logp0 - p1*logp1
@@ -87,30 +98,65 @@ def calculate_psbl_splits(df):
     return psbl_split
 
 
+def best_split(psbl_split):
+    print('All keys', psbl_split.keys())
+    max_info_gain = 0
+    max_key = 0
+    max_threshold = 0
+    left_data = []
+    right_data = []
+    for key in (psbl_split.keys()):
+        print('Key', key)
+        val = psbl_split[key]
+        # print('Vl', val)
+        for threshold in val:
+            # threshold = val[0]
+            # print('In loop', key, threshold)
+            left, right = split(df, key, threshold)
+            # ('leftcount', len(left), 'rightcount', len(right))
+            info_gain = calculate_infogain(df, left, right)
+            if info_gain == 'null':
+                continue
+            # print('info gain competed', info_gain)
+            if info_gain >= max_info_gain:
+                max_info_gain = info_gain
+                max_threshold = threshold
+                max_key = key
+                left_data = left
+                right_data = right
+
+    print(max_info_gain, max_threshold, max_key)
+    return max_info_gain, max_threshold, max_key, left_data, right_data
+
+
+def calculate_leaf_value(Y):
+    Y = list(Y)
+    return max(Y, key=Y.count)
+
+
+def rec(df):
+    X, Y = df[:, :-1], df[:, -1]
+    num_samples, num_features = np.shape(X)
+    max_info_gain, max_threshold, max_key, left_data, right_data = best_split(
+        df, num_samples, num_features)
+    # TODO: Update Stopping condition
+    if max_info_gain != "null":
+        if max_info_gain > 0:
+            # recur left
+            left_subtree = rec(left_data)
+            # recur right
+            right_subtree = rec(right_data)
+            # return decision node
+            return Node(best_split["feature_index"], max_threshold,
+                        left_subtree, right_subtree, max_info_gain)
+
+    leaf_value = calculate_leaf_value(Y)
+    # return leaf node
+    return Node(value=leaf_value)
+
+
 df = pd.read_csv('./dataset/D1.txt', sep=" ",
                  header=None, names=["X1", "X2", "Y"])
 psbl_split = calculate_psbl_splits(df)
-
-max_info_gain = 0
-max_threshold = 0
-max_key = 0
-print('All keys', psbl_split.keys())
-for key in (psbl_split.keys()):
-    print('Key', key)
-    val = psbl_split[key]
-    # print('Vl', val)
-    for threshold in val:
-        # threshold = val[0]
-        print('In loop', key, threshold)
-        left, right = split(df, key, threshold)
-        print('leftcount', len(left), 'rightcount', len(right))
-        info_gain = calculate_infogain(df, left, right)
-        if info_gain == 'null':
-            continue
-        print('info gain competed', info_gain)
-        if info_gain >= max_info_gain:
-            max_info_gain = info_gain
-            max_threshold = threshold
-            max_key = key
-
-print(max_info_gain, max_threshold, max_key)
+max_info_gain, max_threshold, max_key = best_split(psbl_split)
+root = rec(df)
