@@ -2,6 +2,7 @@ import pandas as pd
 import math
 import time
 from Node import Node
+from print_tree import print_tree
 
 
 def calculate_entropy(df):
@@ -130,6 +131,7 @@ def main():
     root = rec(df)
     end = time.time()
     print('Time elapsed ', end-start)
+    print_tree(root)
 
 
 main()
