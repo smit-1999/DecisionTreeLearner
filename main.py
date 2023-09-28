@@ -1,18 +1,7 @@
 import pandas as pd
 import math
-import numpy as np
 import time
-
-
-class Node():
-    def __init__(self, index=None, threshold=None, leftChild=None, rightChild=None, info_gain=None, value=None):
-        self.index = index
-        self.threshold = threshold
-        self.leftChild = leftChild
-        self.rightChild = rightChild
-        self.info_gain = info_gain
-
-        self.value = value
+from Node import Node
 
 
 def calculate_entropy(df):
@@ -136,7 +125,7 @@ def rec(df):
 
 def main():
     start = time.time()
-    df = pd.read_csv('./dataset/D2.txt', sep=" ",
+    df = pd.read_csv('./dataset/D1.txt', sep=" ",
                      header=None, names=["X1", "X2", "Y"])
     root = rec(df)
     end = time.time()
