@@ -1,6 +1,7 @@
 import pandas as pd
 import math
 import numpy as np
+import time
 
 
 class Node():
@@ -27,9 +28,9 @@ def calculate_entropy(df):
         c1 = df['Y'].value_counts()[1]
     # print('c0', c0, 'c1', c1)
     if c0 == 0:
-        return 'null'
+        return 0
     if c1 == 0:
-        return 'null'
+        return 0
     c_total = c0 + c1
 
     p0 = c0/c_total
@@ -62,16 +63,16 @@ def calculate_infogain(df, left, right):
     w_r = len(right)/len(df)
     # print('weights left,right', w_l, w_r)
     left_entropy = calculate_entropy(left)
-    if (left_entropy == 'null'):
-        return 'null'
+    # if (left_entropy == 'null'):
+    # return 'null'
     # print('leftentropy', left_entropy)
     right_entropy = calculate_entropy(right)
-    if (right_entropy == 'null'):
-        return 'null'
+    # if (right_entropy == 'null'):
+    #    return 'null'
     # print('rightnetropy', right_entropy)
     final_entropy = (w_l*left_entropy) + (w_r*right_entropy)
     info_gain = initial_entropy-final_entropy
-    print('Infogain', info_gain)
+    # print('Infogain', info_gain)
     return info_gain
 
 
@@ -81,7 +82,6 @@ def calculate_psbl_splits(df):
         cname = df.columns[i]
         filtered_df = df.filter([cname, 'Y'], axis=1)
         sorted_df = filtered_df.sort_values(cname)
-        # sorted_df = (sorted_df[0:177])
         # diff_df=sorted_df.diff()
         # print('diffdf',diff_df.loc[(diff_df['Y'] == 1) | (diff_df['Y'] == -1)])
         # psbl_c_split = diff_df.loc[(diff_df['Y'] == 1) | (diff_df['Y'] == -1)]
@@ -98,8 +98,8 @@ def calculate_psbl_splits(df):
     return psbl_split
 
 
-def best_split(psbl_split):
-    print('All keys', psbl_split.keys())
+def best_split(psbl_split, df):
+    # print('All keys', psbl_split.keys())
     max_info_gain = 0
     max_key = 0
     max_threshold = 0
@@ -135,28 +135,40 @@ def calculate_leaf_value(Y):
 
 
 def rec(df):
-    X, Y = df[:, :-1], df[:, -1]
-    num_samples, num_features = np.shape(X)
+    # X, Y = df[:, :-1], df[:, -1]
+    # num_samples, num_features = np.shape(X)
+    # print('Length of curr df', len(df))
+    psbl_split = calculate_psbl_splits(df)
+    # print('Psbl', psbl_split['X1'], psbl_split['X2'])
     max_info_gain, max_threshold, max_key, left_data, right_data = best_split(
-        df, num_samples, num_features)
-    # TODO: Update Stopping condition
-    if max_info_gain != "null":
-        if max_info_gain > 0:
-            # recur left
-            left_subtree = rec(left_data)
-            # recur right
-            right_subtree = rec(right_data)
-            # return decision node
-            return Node(best_split["feature_index"], max_threshold,
-                        left_subtree, right_subtree, max_info_gain)
+        psbl_split, df)
+    # print(len(left_data), len(right_data), max_info_gain, max_key)
+    if len(left_data) > 0 and len(right_data) > 0 and max_info_gain != "null" and max_info_gain > 0:
+        # recur left
+        # print('in left subtree', left_data)
+        left_subtree = rec(left_data)
+        # recur right
+        # print('in right subtree')
+        right_subtree = rec(right_data)
+        # return decision node
+        return Node(max_key, max_threshold,
+                    left_subtree, right_subtree, max_info_gain)
 
-    leaf_value = calculate_leaf_value(Y)
+    # print('creating leaf')
+    leaf_value = calculate_leaf_value(df['Y'])
     # return leaf node
     return Node(value=leaf_value)
 
 
-df = pd.read_csv('./dataset/D1.txt', sep=" ",
-                 header=None, names=["X1", "X2", "Y"])
-psbl_split = calculate_psbl_splits(df)
-max_info_gain, max_threshold, max_key = best_split(psbl_split)
-root = rec(df)
+def main():
+    start = time.time()
+    df = pd.read_csv('./dataset/D2.txt', sep=" ",
+                     header=None, names=["X1", "X2", "Y"])
+    # psbl_split = calculate_psbl_splits(df)
+    # max_info_gain, max_threshold, max_key, lef = best_split(psbl_split)
+    root = rec(df)
+    end = time.time()
+    print('Time elapsed ', end-start)
+
+
+main()
