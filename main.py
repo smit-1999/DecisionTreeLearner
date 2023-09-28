@@ -99,25 +99,19 @@ def calculate_psbl_splits(df):
 
 
 def best_split(psbl_split, df):
-    # print('All keys', psbl_split.keys())
     max_info_gain = 0
     max_key = 0
     max_threshold = 0
     left_data = []
     right_data = []
     for key in (psbl_split.keys()):
-        print('Key', key)
         val = psbl_split[key]
-        # print('Vl', val)
         for threshold in val:
             # threshold = val[0]
-            # print('In loop', key, threshold)
             left, right = split(df, key, threshold)
-            # ('leftcount', len(left), 'rightcount', len(right))
             info_gain = calculate_infogain(df, left, right)
             if info_gain == 'null':
                 continue
-            # print('info gain competed', info_gain)
             if info_gain >= max_info_gain:
                 max_info_gain = info_gain
                 max_threshold = threshold
@@ -125,7 +119,6 @@ def best_split(psbl_split, df):
                 left_data = left
                 right_data = right
 
-    print(max_info_gain, max_threshold, max_key)
     return max_info_gain, max_threshold, max_key, left_data, right_data
 
 
@@ -137,24 +130,18 @@ def calculate_leaf_value(Y):
 def rec(df):
     # X, Y = df[:, :-1], df[:, -1]
     # num_samples, num_features = np.shape(X)
-    # print('Length of curr df', len(df))
     psbl_split = calculate_psbl_splits(df)
-    # print('Psbl', psbl_split['X1'], psbl_split['X2'])
     max_info_gain, max_threshold, max_key, left_data, right_data = best_split(
         psbl_split, df)
-    # print(len(left_data), len(right_data), max_info_gain, max_key)
     if len(left_data) > 0 and len(right_data) > 0 and max_info_gain != "null" and max_info_gain > 0:
         # recur left
-        # print('in left subtree', left_data)
         left_subtree = rec(left_data)
         # recur right
-        # print('in right subtree')
         right_subtree = rec(right_data)
         # return decision node
         return Node(max_key, max_threshold,
                     left_subtree, right_subtree, max_info_gain)
 
-    # print('creating leaf')
     leaf_value = calculate_leaf_value(df['Y'])
     # return leaf node
     return Node(value=leaf_value)
