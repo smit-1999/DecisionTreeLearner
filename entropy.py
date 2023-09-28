@@ -1,3 +1,6 @@
+import math
+
+
 def calculate_entropy(df):
     # once we have the possible splits we will try to find entropy for the same
     # h_y = -p0*logp0 - p1*logp1
