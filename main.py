@@ -19,14 +19,12 @@ def calculate_entropy(df):
     # once we have the possible splits we will try to find entropy for the same
     # h_y = -p0*logp0 - p1*logp1
     # where p0=countOfZeros/totalValues, p1=countOfOnes/totalValues
-    # print('valuecounts', df['Y'].value_counts())
     c0 = 0
     c1 = 0
     if df['Y'].value_counts().get(0, 0):
         c0 = df['Y'].value_counts()[0]
     if df['Y'].value_counts().get(1, 0):
         c1 = df['Y'].value_counts()[1]
-    # print('c0', c0, 'c1', c1)
     if c0 == 0:
         return 0
     if c1 == 0:
@@ -56,23 +54,17 @@ def split(df, c_name, threshold):
 
 
 def calculate_infogain(df, left, right):
-    # print('calculating infgain')
     initial_entropy = calculate_entropy(df)
-    # print('initial,', initial_entropy)
     w_l = len(left)/len(df)
     w_r = len(right)/len(df)
-    # print('weights left,right', w_l, w_r)
     left_entropy = calculate_entropy(left)
     # if (left_entropy == 'null'):
     # return 'null'
-    # print('leftentropy', left_entropy)
     right_entropy = calculate_entropy(right)
     # if (right_entropy == 'null'):
     #    return 'null'
-    # print('rightnetropy', right_entropy)
     final_entropy = (w_l*left_entropy) + (w_r*right_entropy)
     info_gain = initial_entropy-final_entropy
-    # print('Infogain', info_gain)
     return info_gain
 
 
@@ -83,14 +75,12 @@ def calculate_psbl_splits(df):
         filtered_df = df.filter([cname, 'Y'], axis=1)
         sorted_df = filtered_df.sort_values(cname)
         # diff_df=sorted_df.diff()
-        # print('diffdf',diff_df.loc[(diff_df['Y'] == 1) | (diff_df['Y'] == -1)])
         # psbl_c_split = diff_df.loc[(diff_df['Y'] == 1) | (diff_df['Y'] == -1)]
         sorted_df['Z'] = sorted_df['Y'].diff(1)
         diff_Z = sorted_df.loc[(
             sorted_df['Z'] == 1) | (sorted_df['Z'] == -1)]
         # tst = sorted_df.loc[(sorted_df['Z'] == 1) | (
         #     sorted_df['Z'] == -1), cname]
-        # print('tst', tst)
         if cname in psbl_split.keys():
             psbl_split[cname].append(diff_Z[cname].values.flatten())
         else:
@@ -107,7 +97,6 @@ def best_split(psbl_split, df):
     for key in (psbl_split.keys()):
         val = psbl_split[key]
         for threshold in val:
-            # threshold = val[0]
             left, right = split(df, key, threshold)
             info_gain = calculate_infogain(df, left, right)
             if info_gain == 'null':
@@ -128,8 +117,6 @@ def calculate_leaf_value(Y):
 
 
 def rec(df):
-    # X, Y = df[:, :-1], df[:, -1]
-    # num_samples, num_features = np.shape(X)
     psbl_split = calculate_psbl_splits(df)
     max_info_gain, max_threshold, max_key, left_data, right_data = best_split(
         psbl_split, df)
@@ -151,8 +138,6 @@ def main():
     start = time.time()
     df = pd.read_csv('./dataset/D2.txt', sep=" ",
                      header=None, names=["X1", "X2", "Y"])
-    # psbl_split = calculate_psbl_splits(df)
-    # max_info_gain, max_threshold, max_key, lef = best_split(psbl_split)
     root = rec(df)
     end = time.time()
     print('Time elapsed ', end-start)
