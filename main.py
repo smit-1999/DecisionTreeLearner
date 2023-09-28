@@ -1,9 +1,8 @@
 import pandas as pd
-import math
 import time
 from Node import Node
 from print_tree import print_tree
-from entropy import calculate_entropy
+from infogain import calculate_infogain
 
 
 def split(df, c_name, threshold):
@@ -16,21 +15,6 @@ def split(df, c_name, threshold):
     left = df.loc[df[c_name] <= threshold]
     right = df.loc[df[c_name] > threshold]
     return left, right
-
-
-def calculate_infogain(df, left, right):
-    initial_entropy = calculate_entropy(df)
-    w_l = len(left)/len(df)
-    w_r = len(right)/len(df)
-    left_entropy = calculate_entropy(left)
-    # if (left_entropy == 'null'):
-    # return 'null'
-    right_entropy = calculate_entropy(right)
-    # if (right_entropy == 'null'):
-    #    return 'null'
-    final_entropy = (w_l*left_entropy) + (w_r*right_entropy)
-    info_gain = initial_entropy-final_entropy
-    return info_gain
 
 
 def calculate_psbl_splits(df):
@@ -101,7 +85,7 @@ def rec(df):
 
 def main():
     start = time.time()
-    df = pd.read_csv('./dataset/D2.txt', sep=" ",
+    df = pd.read_csv('./dataset/D1.txt', sep=" ",
                      header=None, names=["X1", "X2", "Y"])
     root = rec(df)
     end = time.time()
