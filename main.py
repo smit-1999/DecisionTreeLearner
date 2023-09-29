@@ -1,3 +1,4 @@
+from print_tree import print_tree_bfs, print_tree
 import pandas as pd
 import time
 from sklearn import metrics
@@ -6,6 +7,8 @@ from draw_boundary import draw
 from infogain import calculate_infogain
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings("ignore")
 
 # given a dataframe split the dataframe rows into rows which are less than a threshold (for c_name column)
 # and greater than threshold
@@ -107,7 +110,7 @@ def train(df):
     Y = df['Y']
     X_train, X_test, Y_train, Y_test = train_test_split(
         X, Y, test_size=.1808)
-    dataset_size = [32, 128, 512, 2048, 8192, 12000]  # as mentioned in q2.7
+    dataset_size = [32, 128, 512, 2048, 8192]  # as mentioned in q2.7
     error_rate = []
     for i in range(0, len(dataset_size)):
         sz = min(dataset_size[i], len(X))
@@ -117,7 +120,13 @@ def train(df):
         root = rec(x_train_subset, None)
         Y_pred = predict(X_test, root)
         error_rate.append(1 - metrics.accuracy_score(Y_test, Y_pred))
-        # draw(root, sz)
+        # print('No of points:', sz, 'Error rate:', 1 -
+        #       metrics.accuracy_score(Y_test, Y_pred))
+        draw(root, sz)
+        # print('Tree printing using DFS began when tree is trained on ',
+        # sz, 'data points')
+        # print_tree(root)
+    print(dataset_size, error_rate)
     plt.plot(dataset_size, error_rate)
     plt.xlabel('Number of Points n')
     plt.ylabel('Error')
@@ -133,8 +142,6 @@ def main():
     train(df)
     end = time.time()
     print('Time elapsed ', end-start)
-    # print_tree(root)
-    # print_tree_bfs(root)
 
 
 main()
