@@ -45,28 +45,55 @@ def draw_decision_boundary(model_function: Callable, grid_abs_bound: float = 1.0
         legend_labels.append(
             f"""{y_label} = {label}""")  # apply labels for legend in the same order as sorted dataframe
 
-    plt.title("Model Decision Boundary Example", fontsize=12)  # set plot title
+    plt.title("Model Decision Boundary for" + str(numberOfPoints) +
+              "points", fontsize=12)  # set plot title
     ax = plt.gca()  # grab to set background color of plot
     # set aforementioned background color in hex color
-    ax.set_facecolor('#2b2d2e')
+    ax.set_facecolor('white')
     plt.legend(legend_labels)  # create legend with sorted labels
 
     if savefile is not None:  # save your plot as .png file
         plt.savefig(savefile)
+    plt.xlim(-2, 2)
+    plt.ylim(-2, 2)
     plt.show()  # show plot with decision bounds
 
 
 def model_y(row):
     """example model used to demonstrate drawing decision bounds for hw2"""
     x_1, x_2 = row.x_1, row.x_2  # grabs standardized labels from pandas.apply function input and renames to more familiar variables
-    if x_1 >= 0.0:
-        if x_2 >= 0.0:
-            return 0
-        return 1
-    if x_2 >= 0.0:
-        return 1
-    return 0
+    # if x_1 >= 0.0:
+    #     if x_2 >= 0.0:
+    #         return 0
+    #     return 1
+    # if x_2 >= 0.0:
+    #     return 1
+    # return 0
+    return dfs(x_1, x_2, rootNode)
+    # if not tree:
+    #     tree = root
 
 
-# generate decision boundary plot
-draw_decision_boundary(model_function=model_y, grid_abs_bound=1)
+def draw(root, no_of_points):
+    # generate decision boundary plot
+    global rootNode
+    global numberOfPoints
+    rootNode = root
+    numberOfPoints = no_of_points
+    draw_decision_boundary(model_function=model_y, grid_abs_bound=1.5)
+
+
+def dfs(x1, x2, curr):
+    if curr.value is not None:
+        return curr.value
+
+    if curr.index == 'X1':
+        if (x1 <= curr.threshold):
+            return dfs(x1, x2, curr.leftChild)
+        else:
+            return dfs(x1, x2, curr.rightChild)
+    else:
+        if (x2 <= curr.threshold):
+            return dfs(x1, x2, curr.leftChild)
+        else:
+            return dfs(x1, x2, curr.rightChild)
