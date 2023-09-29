@@ -35,7 +35,7 @@ def print_tree_bfs(curr):
         while currSize > 0:
             currNode = queue.popleft()
             currList.append(
-                {currNode.index, currNode.threshold, currNode.info_gain})
+                {currNode.index, currNode.threshold, currNode.info_gain, '' if curr.parent is None else 'Parent threshold' + str(curr.parent.threshold)})
             currSize -= 1
 
             # Check for left child
