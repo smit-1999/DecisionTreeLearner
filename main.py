@@ -126,8 +126,6 @@ def train(df):
     plt.xlabel('Number of Points n')
     plt.ylabel('Error')
     plt.xscale('log')
-    # for i_x, i_y in zip(dataset_size, error_rate):
-    #     plt.text(i_x, i_y, '({}, {})'.format(i_x, i_y))
     plt.show()
 
 
