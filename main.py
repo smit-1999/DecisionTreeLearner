@@ -7,14 +7,11 @@ from infogain import calculate_infogain
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
+# given a dataframe split the dataframe rows into rows which are less than a threshold (for c_name column)
+# and greater than threshold
+
 
 def split(df, c_name, threshold):
-    ''' function to split the data '''
-
-    # left = np.array(
-    #     [row for row in df if row[feature_index] <= threshold])
-    # right = np.array(
-    #     [row for row in df if row[feature_index] > threshold])
     left = df.loc[df[c_name] <= threshold]
     right = df.loc[df[c_name] > threshold]
     return left, right
@@ -97,7 +94,6 @@ def predict(X, root):
 def make_prediction(x, curr):
     if curr.value != None:
         return curr.value
-    # print('make rpediction', x, type(x))
     feature_val = x[curr.index]
     if feature_val <= curr.threshold:
         return make_prediction(x, curr.leftChild)
@@ -111,7 +107,7 @@ def train(df):
     Y = df['Y']
     X_train, X_test, Y_train, Y_test = train_test_split(
         X, Y, test_size=.1808)
-    dataset_size = [32, 128, 512, 2048, 8192, 12000]
+    dataset_size = [32, 128, 512, 2048, 8192, 12000]  # as mentioned in q2.7
     error_rate = []
     for i in range(0, len(dataset_size)):
         sz = min(dataset_size[i], len(X))
@@ -121,11 +117,11 @@ def train(df):
         root = rec(x_train_subset, None)
         Y_pred = predict(X_test, root)
         error_rate.append(1 - metrics.accuracy_score(Y_test, Y_pred))
-        draw(root, sz)
+        # draw(root, sz)
     plt.plot(dataset_size, error_rate)
     plt.xlabel('Number of Points n')
     plt.ylabel('Error')
-    plt.xscale('log')
+    # plt.xscale('log')
     plt.show()
 
 
