@@ -33,6 +33,11 @@ def sklearn():
         error_rate.append(1 - metrics.accuracy_score(y_test, y_pred_subset))
 
     plt.plot(dataset_size, error_rate)
+    plt.xlabel('Number of Points n')
+    plt.ylabel('Error')
+    plt.xscale('log')
+    # for i_x, i_y in zip(dataset_size, error_rate):
+    #     plt.text(i_x, i_y, '({}, {})'.format(i_x, i_y))
     plt.show()
 
 
