@@ -1,5 +1,6 @@
 
 from entropy import calculate_entropy
+import math
 
 
 def calculate_infogain(df, left, right):
@@ -14,4 +15,16 @@ def calculate_infogain(df, left, right):
     #    return 'null'
     final_entropy = (w_l*left_entropy) + (w_r*right_entropy)
     info_gain = initial_entropy-final_entropy
-    return info_gain
+    left_entropy_split = 0
+    right_entropy_split = 0
+    if w_l == 0:
+        left_entropy_split = 0
+    else:
+        left_entropy_split = w_l*math.log2(w_l)
+    if w_r == 0:
+        right_entropy_split = 0
+    else:
+        right_entropy_split = w_r*math.log2(w_r)
+    entropy_split = -(left_entropy_split) - (right_entropy_split)
+    gain_ratio = info_gain/entropy_split
+    return gain_ratio
