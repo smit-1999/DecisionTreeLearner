@@ -1,8 +1,11 @@
 import pandas as pd
 import time
+from sklearn import metrics
 from Node import Node
-from print_tree import print_tree
+from draw_boundary import draw
 from infogain import calculate_infogain
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 
 
 def split(df, c_name, threshold):
@@ -65,32 +68,79 @@ def calculate_leaf_value(Y):
     return max(Y, key=Y.count)
 
 
-def rec(df):
+def rec(df, parent):
     psbl_split = calculate_psbl_splits(df)
     max_info_gain, max_threshold, max_key, left_data, right_data = best_split(
         psbl_split, df)
     if len(left_data) > 0 and len(right_data) > 0 and max_info_gain != "null" and max_info_gain > 0:
+        newNode = Node(max_key, max_threshold,
+                       [], [], max_info_gain, parent=parent)
         # recur left
-        left_subtree = rec(left_data)
+        left_subtree = rec(left_data, newNode)
         # recur right
-        right_subtree = rec(right_data)
-        # return decision node
-        return Node(max_key, max_threshold,
-                    left_subtree, right_subtree, max_info_gain)
+        right_subtree = rec(right_data, newNode)
+        newNode.leftChild = left_subtree
+        newNode.rightChild = right_subtree
+        return newNode
 
     leaf_value = calculate_leaf_value(df['Y'])
-    # return leaf node
-    return Node(value=leaf_value)
+    return Node(value=leaf_value, parent=parent)
+
+
+def predict(X, root):
+    predictions = []
+    for i in range(0, (X.shape[0])):
+        predictions.append(make_prediction(X.iloc[i, :], root))
+    return predictions
+
+
+def make_prediction(x, curr):
+    if curr.value != None:
+        return curr.value
+    # print('make rpediction', x, type(x))
+    feature_val = x[curr.index]
+    if feature_val <= curr.threshold:
+        return make_prediction(x, curr.leftChild)
+    else:
+        return make_prediction(x, curr.rightChild)
+
+
+def train(df):
+    feature_cols = ['X1', 'X2']
+    X = df[feature_cols]
+    Y = df['Y']
+    X_train, X_test, Y_train, Y_test = train_test_split(
+        X, Y, test_size=.1808)
+    dataset_size = [32, 128, 512, 2048, 8192, 12000]
+    error_rate = []
+    for i in range(0, len(dataset_size)):
+        sz = min(dataset_size[i], len(X))
+        x_train_subset = X_train.iloc[:sz]
+        y_train_subset = pd.DataFrame(Y_train.iloc[:sz])
+        x_train_subset['Y'] = y_train_subset
+        root = rec(x_train_subset, None)
+        Y_pred = predict(X_test, root)
+        error_rate.append(1 - metrics.accuracy_score(Y_test, Y_pred))
+        draw(root, sz)
+    plt.plot(dataset_size, error_rate)
+    plt.xlabel('Number of Points n')
+    plt.ylabel('Error')
+    plt.xscale('log')
+    # for i_x, i_y in zip(dataset_size, error_rate):
+    #     plt.text(i_x, i_y, '({}, {})'.format(i_x, i_y))
+    plt.show()
 
 
 def main():
     start = time.time()
-    df = pd.read_csv('./dataset/D1.txt', sep=" ",
+    df = pd.read_csv('./dataset/Dbig.txt', sep=" ",
                      header=None, names=["X1", "X2", "Y"])
-    root = rec(df)
+    # root = rec(df, None)
+    train(df)
     end = time.time()
     print('Time elapsed ', end-start)
-    print_tree(root)
+    # print_tree(root)
+    # print_tree_bfs(root)
 
 
 main()
